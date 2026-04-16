@@ -1,12 +1,9 @@
+from rules import check_rule
+
 action = "READ_SENSITIVE_DATA"
 approved = False
 
-if action == "READ_SENSITIVE_DATA" and not approved:
-    decision = "DENY"
-    reason = "Approval missing"
-else:
-    decision = "ALLOW"
-    reason = "Approved"
+decision, reason = check_rule(action, approved)
 
 print("Action:", action)
 print("Decision:", decision)
