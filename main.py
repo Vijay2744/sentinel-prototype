@@ -1,2 +1,2 @@
-decision, reason, risk = check_rule(action, approved)
-log(action, decision, reason, risk)
+from rules import check_rule
+from logger import log
