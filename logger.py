@@ -10,3 +10,4 @@ def log(action, decision, reason, risk):
     print("Decision:", decision)
     print("Reason:", reason)
     print("--------------------------")
+print("Role:", role)
