@@ -1,25 +1,24 @@
-def check_rule(action, approved):
+def check_rule(action, approved, role):
 
-    # Define risk levels
-    risk_levels = {
-        "READ_PUBLIC_DATA": "LOW",
-        "READ_SENSITIVE_DATA": "HIGH",
-        "DELETE_DATA": "CRITICAL"
-    }
+    rule = POLICY.get(action)
 
-    risk = risk_levels.get(action, "UNKNOWN")
+    if not rule:
+        return "DENY", "Unknown action", "UNKNOWN"
 
-    # Decision logic based on risk
+    risk = rule["risk"]
+    requires_approval = rule["requires_approval"]
+
+    # Role-based restriction
+    if role == "ANALYST" and risk in ["HIGH", "CRITICAL"]:
+        return "DENY", "Role not allowed for high risk", risk
+
     if risk == "LOW":
         return "ALLOW", "Low risk action", risk
 
-    elif risk == "HIGH":
-        if not approved:
-            return "DENY", "High risk requires approval", risk
-        return "ALLOW", "Approved high risk action", risk
+    if requires_approval and not approved:
+        return "DENY", "Approval required", risk
 
-    elif risk == "CRITICAL":
-        return "DENY", "Critical actions are blocked", risk
+    if risk == "CRITICAL":
+        return "DENY", "Critical actions blocked", risk
 
-    else:
-        return "DENY", "Unknown action", risk
+    return "ALLOW", "Allowed by policy", risk
