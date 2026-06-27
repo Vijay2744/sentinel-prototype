@@ -1,13 +1,16 @@
 from datetime import datetime
 
-def log(action, decision, reason, risk, role):
-    timestamp = datetime.now()
 
-    print("------ SENTINEL LOG ------")
-    print("Time:", timestamp)
-    print("Action:", action)
-    print("Role:", role)
-    print("Risk Level:", risk)
-    print("Decision:", decision)
-    print("Reason:", reason)
+def log(result):
+
+    print("\n------ SENTINEL LOG ------")
+
+    print("Time:", result.timestamp)
+    print("Action:", result.action)
+    print("Role:", result.role)
+    print("Risk Level:", result.risk)
+
+    print("Decision:", result.decision)
+    print("Reason:", result.reason)
+
     print("--------------------------")
