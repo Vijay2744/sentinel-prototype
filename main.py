@@ -11,10 +11,11 @@ actions = [
 ]
 
 for item in actions:
-    action = item["action"]
-    approved = item["approved"]
-    role = item["role"]
 
-    decision, reason, risk = check_rule(action, approved, role)
+    result = check_rule(
+        item["action"],
+        item["approved"],
+        item["role"]
+    )
 
-    log(action, decision, reason, risk, role)
+    log(result)
