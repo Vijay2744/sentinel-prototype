@@ -1,28 +1,31 @@
+import json
 from openai import OpenAI
 import streamlit as st
 
-from models import Decision
-from policy import get_policy
+from models import DecisionContext, Decision
+from policy import evaluate_policy
 
 
 SYSTEM_PROMPT = """
 You are Sentinel Decision Intelligence Engine.
 
-Your responsibility is ONLY to analyze the risk.
+Your ONLY responsibility is to analyse business risk.
 
-Return ONLY valid JSON.
+Return ONLY JSON in this format:
 
 {
     "risk_score": 0,
-    "risk_types": "",
+    "risk_types": ["Operational"],
     "impact": "",
     "opportunities": [],
     "recommendations": []
 }
+
+Do NOT return risk level or decision.
 """
 
 
-def evaluate_decision(user_input: str) -> Decision:
+def evaluate_decision(context: DecisionContext) -> Decision:
 
     client = OpenAI(
         api_key=st.secrets["OPENAI_API_KEY"]
@@ -43,12 +46,10 @@ def evaluate_decision(user_input: str) -> Decision:
             },
             {
                 "role": "user",
-                "content": user_input
+                "content": context.user_input
             }
         ]
     )
-
-    import json
 
     ai = json.loads(
         response.choices[0].message.content
@@ -56,7 +57,7 @@ def evaluate_decision(user_input: str) -> Decision:
 
     risk_score = int(ai["risk_score"])
 
-    policy = get_policy(risk_score)
+    policy = evaluate_policy(risk_score)
 
     return Decision(
 
@@ -66,15 +67,17 @@ def evaluate_decision(user_input: str) -> Decision:
 
         decision=policy["decision"],
 
-        risk_types=ai["risk_types"],
+        workflow=policy["workflow"],
 
-        impact=ai["impact"],
+        risk_types=ai.get("risk_types", []),
 
-        opportunities=ai["opportunities"],
+        impact=ai.get("impact", ""),
 
-        recommendations=ai["recommendations"],
+        opportunities=ai.get("opportunities", []),
 
-        policy_triggered=policy["risk_level"],
+        recommendations=ai.get("recommendations", []),
+
+        policy_triggered=policy["policy_triggered"],
 
         audit_required=policy["audit_required"]
 
