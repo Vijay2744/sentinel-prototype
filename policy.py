@@ -1,61 +1,74 @@
 """
-Sentinel Core Policy Repository
-
-This file contains enterprise policies that determine
-how Sentinel classifies and routes decisions.
+Sentinel Enterprise Policy Repository
 """
 
-POLICY = {
+POLICY_MATRIX = {
 
     "LOW": {
-        "score_min": 0,
-        "score_max": 30,
+        "min_score": 0,
+        "max_score": 30,
         "decision": "APPROVE",
+        "workflow": "STP",
         "audit_required": False
     },
 
     "MEDIUM": {
-        "score_min": 31,
-        "score_max": 60,
+        "min_score": 31,
+        "max_score": 60,
         "decision": "REVIEW",
+        "workflow": "BUSINESS_REVIEW",
         "audit_required": False
     },
 
     "HIGH": {
-        "score_min": 61,
-        "score_max": 85,
+        "min_score": 61,
+        "max_score": 85,
         "decision": "ESCALATE",
+        "workflow": "HUMAN_REVIEW",
         "audit_required": True
     },
 
     "CRITICAL": {
-        "score_min": 86,
-        "score_max": 100,
+        "min_score": 86,
+        "max_score": 100,
         "decision": "REJECT",
+        "workflow": "BLOCKED",
         "audit_required": True
     }
 
 }
 
 
-def get_policy(risk_score: int):
-    """
-    Returns the applicable enterprise policy
-    based on the calculated risk score.
-    """
+def evaluate_policy(risk_score: int):
 
-    for level, config in POLICY.items():
+    for risk_level, config in POLICY_MATRIX.items():
 
-        if config["score_min"] <= risk_score <= config["score_max"]:
+        if config["min_score"] <= risk_score <= config["max_score"]:
 
             return {
-                "risk_level": level,
+
+                "risk_level": risk_level,
+
                 "decision": config["decision"],
-                "audit_required": config["audit_required"]
+
+                "workflow": config["workflow"],
+
+                "audit_required": config["audit_required"],
+
+                "policy_triggered": f"{risk_level}_RISK_POLICY"
+
             }
 
     return {
+
         "risk_level": "UNKNOWN",
+
         "decision": "REVIEW",
-        "audit_required": True
+
+        "workflow": "HUMAN_REVIEW",
+
+        "audit_required": True,
+
+        "policy_triggered": "DEFAULT_POLICY"
+
     }
