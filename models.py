@@ -5,10 +5,6 @@ from typing import List
 
 @dataclass
 class DecisionContext:
-    """
-    Incoming request from the UI.
-    """
-
     user_input: str
     user_role: str = "USER"
     source: str = "STREAMLIT"
