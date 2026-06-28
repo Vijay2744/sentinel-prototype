@@ -1,27 +1,24 @@
 import json
+
 from openai import OpenAI
 import streamlit as st
 
 from models import DecisionContext, Decision
-from policy import evaluate_policy
+from policy import get_policy
 
 
 SYSTEM_PROMPT = """
-You are Sentinel Decision Intelligence Engine.
+You are Sentinel Enterprise Decision Intelligence.
 
-Your ONLY responsibility is to analyse business risk.
-
-Return ONLY JSON in this format:
+Analyze the decision and return ONLY JSON.
 
 {
     "risk_score": 0,
-    "risk_types": ["Operational"],
+    "risk_types": [],
     "impact": "",
     "opportunities": [],
     "recommendations": []
 }
-
-Do NOT return risk level or decision.
 """
 
 
@@ -49,15 +46,20 @@ def evaluate_decision(context: DecisionContext) -> Decision:
                 "content": context.user_input
             }
         ]
+
     )
 
     ai = json.loads(
         response.choices[0].message.content
     )
 
-    risk_score = int(ai["risk_score"])
+    risk_score = int(
+        ai["risk_score"]
+    )
 
-    policy = evaluate_policy(risk_score)
+    policy = get_policy(
+        risk_score
+    )
 
     return Decision(
 
@@ -69,15 +71,27 @@ def evaluate_decision(context: DecisionContext) -> Decision:
 
         workflow=policy["workflow"],
 
-        risk_types=ai.get("risk_types", []),
+        risk_types=ai.get(
+            "risk_types",
+            []
+        ),
 
-        impact=ai.get("impact", ""),
+        impact=ai.get(
+            "impact",
+            ""
+        ),
 
-        opportunities=ai.get("opportunities", []),
+        opportunities=ai.get(
+            "opportunities",
+            []
+        ),
 
-        recommendations=ai.get("recommendations", []),
+        recommendations=ai.get(
+            "recommendations",
+            []
+        ),
 
-        policy_triggered=policy["policy_triggered"],
+        policy_triggered=policy["workflow"],
 
         audit_required=policy["audit_required"]
 
